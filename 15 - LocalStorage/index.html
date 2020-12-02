@@ -40,12 +40,14 @@
       <input type="text" name="item" placeholder="Item Name" required>
       <input type="submit" value="+ Add Item">
     </form>
+    <button class="check">Toggle All</button>
   </div>
 
   <script>
     const form = document.querySelector('.form');
     const itemsList = document.querySelector('.plates');
-    const items = [];
+    const items = JSON.parse(localStorage.getItem('items')) || [];
+    const checkAll = document.querySelector('.check')
 
     function addItem(e) {
       e.preventDefault()
@@ -54,9 +56,10 @@
 
       items.push(item)
       populateList(items, itemsList)
+      localStorage.setItem('items', JSON.stringify(items))
       this.reset()
     }
-    
+
     function populateList(items = [], itemsList) {
       itemsList.innerHTML = items.map((item, i) =>
         `
@@ -68,7 +71,29 @@
       ).join('')
     }
 
+    function toggleDone(e) {
+      if (!e.target.matches('input')) return
+      const index = e.target.dataset.index
+
+      items[index].done = !items[index].done
+      localStorage.setItem('items', JSON.stringify(items))
+      populateList(items, itemsList)
+    }
+
+    function toggleDoneAll() {
+      items.forEach(item => {
+        item.done = !item.done
+      });
+      localStorage.setItem('items', JSON.stringify(items))
+      populateList(items, itemsList)
+    }
+
+
     form.addEventListener('submit', addItem)
+    itemsList.addEventListener('click', toggleDone)
+    checkAll.addEventListener('click', toggleDoneAll)
+
+    populateList(items, itemsList)
 
   </script>
 
