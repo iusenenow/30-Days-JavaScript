@@ -46,14 +46,18 @@
   <script>
     const form = document.querySelector('.form');
     const itemsList = document.querySelector('.plates');
-    const items = JSON.parse(localStorage.getItem('items')) || [];
+    let items = JSON.parse(localStorage.getItem('items')) || [];
     const checkAll = document.querySelector('.check')
 
+    // add items
     function addItem(e) {
       e.preventDefault()
-      const text = form.querySelector('[name=item]').value
+      const text = this.item.value.trim() // "this" point to the "element". In this case => "form"
+      if (!text.length) {
+        this.reset()
+        return
+      }
       const item = { text, done: false }
-
       items.push(item)
       populateList(items, itemsList)
       localStorage.setItem('items', JSON.stringify(items))
@@ -66,6 +70,7 @@
         <li>
           <input type="checkbox" data-index=${i} id="item${i}" ${item.done ? 'checked' : ''} />
           <label for="item${i}">${item.text}</label>
+          <button class="delete">Delete</button>
         </li>
         `
       ).join('')
@@ -88,8 +93,17 @@
       populateList(items, itemsList)
     }
 
+    function deleteItem(e) {
+      if(!e.target.classList.contains("delete")) return
+      e.target.parentElement.remove()
+      items = items.filter(item => item.text !== e.target.previousElementSibling.innerText)
+      localStorage.setItem('items', JSON.stringify(items))
+      // populateList(items, itemsList)
+    }
+
     form.addEventListener('submit', addItem)
     itemsList.addEventListener('click', toggleDone)
+    itemsList.addEventListener('click', deleteItem)
     checkAll.addEventListener('click', toggleDoneAll)
 
     populateList(items, itemsList)
